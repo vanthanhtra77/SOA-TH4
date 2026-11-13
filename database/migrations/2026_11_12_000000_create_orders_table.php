@@ -7,22 +7,26 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     /**
      * Chạy migration: Tạo bảng orders cho Dịch vụ Quản lý Đơn hàng (Bài TH 4 - SOA)
+     * Tuân thủ cấu trúc Bảng đơn hàng (orders) trong Phụ lục đề bài:
+     * - id: INT (PRIMARY KEY)
+     * - customer_name: VARCHAR(255)
+     * - customer_email: VARCHAR(255)
+     * - total_amount: DECIMAL(10, 2)
+     * - status: VARCHAR(50) (pending, completed, cancelled)
+     * - created_at & updated_at: TIMESTAMP
      */
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->increments('id'); // INT PRIMARY KEY AUTO_INCREMENT
-            $table->unsignedInteger('user_id'); // ID người dùng đặt hàng (từ Auth Service)
-            $table->string('user_name', 255)->nullable(); // Tên tài khoản người đặt
-            $table->unsignedInteger('product_id'); // ID sản phẩm (từ Product Service)
-            $table->string('product_name', 255); // Tên sản phẩm lưu vết
-            $table->integer('quantity'); // Số lượng sản phẩm mua
-            $table->decimal('unit_price', 10, 2); // Đơn giá tại thời điểm mua
-            $table->decimal('total_price', 12, 2); // Tổng tiền = quantity * unit_price
-            $table->string('status', 50)->default('pending'); // pending, confirmed, shipping, completed, cancelled
-            $table->string('receiver_name', 255)->nullable(); // Tên người nhận hàng
-            $table->string('receiver_phone', 50)->nullable(); // Số điện thoại
-            $table->text('shipping_address')->nullable(); // Địa chỉ giao nhận
+            $table->string('customer_name', 255); // Tên khách hàng (bắt buộc theo đề)
+            $table->string('customer_email', 255)->nullable(); // Email khách hàng (theo đề)
+            $table->decimal('total_amount', 12, 2)->default(0); // Tổng số tiền của đơn hàng (theo đề)
+            $table->string('status', 50)->default('pending'); // Trạng thái đơn hàng: pending, completed, cancelled
+            
+            // Các trường bổ trợ tích hợp SOA
+            $table->unsignedInteger('user_id')->nullable(); // ID người dùng (từ Auth Service)
+            $table->text('shipping_address')->nullable(); // Địa chỉ giao hàng
             $table->text('notes')->nullable(); // Ghi chú đơn hàng
             $table->timestamps(); // created_at & updated_at TIMESTAMP
         });

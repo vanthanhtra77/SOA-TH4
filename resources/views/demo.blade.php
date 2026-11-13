@@ -27,7 +27,7 @@
                     </div>
                     <h1 class="text-2xl font-bold mt-2">Dịch Vụ Quản Lý Đơn Hàng (Order Management)</h1>
                     <p class="text-slate-300 text-sm mt-1">
-                        Cơ sở dữ liệu riêng • Kiểm tra tồn kho từ <strong>Product Service (Port 8001)</strong> • Xác thực qua <strong>Auth Service (Port 8000)</strong>
+                        CSDL riêng (<code class="text-amber-400">orders</code> & <code class="text-amber-400">order_items</code>) • Kiểm tra tồn kho từ <strong>Product Service (Port 8001)</strong> • Xác thực qua <strong>Auth Service (Port 8000)</strong>
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -48,161 +48,96 @@
         <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-key"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">1</div>
                     <div>
-                        <div class="text-xs text-slate-500 font-medium">Service 1: Xác Thực (Bài 2)</div>
-                        <div class="text-sm font-bold text-slate-800">Port 8000 (Auth Service)</div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase">Auth Service (Bài 2)</div>
+                        <div class="font-bold text-slate-800 text-sm">Port 8000</div>
                     </div>
                 </div>
-                <span id="badge-auth-service" class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold">Chưa kiểm tra</span>
+                <span id="auth-status-badge" class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium">Chờ đăng nhập</span>
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-boxes-stacked"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold">2</div>
                     <div>
-                        <div class="text-xs text-slate-500 font-medium">Service 2: Sản Phẩm (Bài 3)</div>
-                        <div class="text-sm font-bold text-slate-800">Port 8001 (Product Service)</div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase">Product Service (Bài 3)</div>
+                        <div class="font-bold text-slate-800 text-sm">Port 8001</div>
                     </div>
                 </div>
-                <span id="badge-product-service" class="px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-semibold">Chưa kiểm tra</span>
+                <span id="product-status-badge" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium">Kho & Giá</span>
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                    </div>
+                    <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">3</div>
                     <div>
-                        <div class="text-xs text-slate-500 font-medium">Service 3: Đơn Hàng (Bài 4)</div>
-                        <div class="text-sm font-bold text-slate-800">Port 8002 (Order Service)</div>
+                        <div class="text-xs font-semibold text-slate-500 uppercase">Order Service (Bài 4)</div>
+                        <div class="font-bold text-emerald-700 text-sm">Port 8002 (Hiện tại)</div>
                     </div>
                 </div>
-                <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold">Đang Chạy (UP)</span>
+                <span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium">Hoạt động độc lập</span>
             </div>
         </section>
 
-        <!-- 2. Authentication & Live Stock Viewer -->
-        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Form Auth Service -->
-            <div class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                        <h2 class="text-base font-bold text-slate-800 flex items-center">
-                            <i class="fa-solid fa-shield-halved text-indigo-600 mr-2"></i> 1. Xác thực người dùng (Auth Service - Port 8000)
-                        </h2>
-                        <span id="auth-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
-                            Chưa có Token
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">UserName</label>
-                            <input type="text" id="auth-username" value="student" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Mật khẩu</label>
-                            <input type="password" id="auth-password" value="123456" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-                        </div>
-                    </div>
-
-                    <div class="flex gap-2 mb-3">
-                        <button onclick="loginAuthService()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded text-xs font-semibold shadow-sm transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-right-to-bracket"></i> Đăng Nhập Service 2
-                        </button>
-                        <button onclick="clearToken()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-2 rounded text-xs font-semibold transition" title="Xóa Token">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                    </div>
-
-                    <div>
-                        <div class="flex items-center justify-between text-xs text-slate-500 mb-1">
-                            <span>Bearer Token hiện hành:</span>
-                            <span id="user-info-text">Chưa xác thực</span>
-                        </div>
-                        <textarea id="current-token" rows="2" readonly placeholder="Chưa có token. Bấm 'Đăng Nhập Service 2' ở trên..." class="w-full text-xs code-font bg-slate-50 border border-slate-300 rounded p-2 text-slate-700 resize-none"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Live Products & Stock Viewer -->
-            <div class="lg:col-span-6 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-                        <h2 class="text-base font-bold text-slate-800 flex items-center">
-                            <i class="fa-solid fa-warehouse text-emerald-600 mr-2"></i> 2. Tồn kho thời gian thực (Product Service - Port 8001)
-                        </h2>
-                        <button onclick="loadProductsStock()" class="text-xs text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1">
-                            <i class="fa-solid fa-rotate"></i> Làm mới tồn kho
-                        </button>
-                    </div>
-
-                    <div id="product-stock-list" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        <div class="text-xs text-center text-slate-400 py-6">
-                            <i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang tải dữ liệu tồn kho từ Product Service...
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between items-center">
-                    <span>* Khi tạo đơn hàng, Order Service sẽ tự động trừ số lượng tồn kho này.</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. Create Order & Manage Orders Section -->
+        <!-- 2. Authentication Bar -->
         <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-4 mb-5 gap-4">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-lg">
-                        <i class="fa-solid fa-receipt"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-slate-800">3. Quản Lý Đơn Hàng (RESTful API Orders)</h2>
-                        <p class="text-xs text-slate-500">Cơ sở dữ liệu riêng: bảng <code class="text-sky-700 code-font">orders</code> (id, user_id, product_id, quantity, total_price, status...)</p>
-                    </div>
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-indigo-600"></i>
+                        Xác Thực Liên Dịch Vụ (Auth Service - Port 8000)
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Đăng nhập tài khoản mẫu <code class="text-indigo-600 code-font">student</code> (mật khẩu <code class="code-font">123456</code>) để lấy JWT Bearer Token</p>
                 </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button onclick="loginSampleUser()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-key"></i> Đăng nhập & Lấy Token mẫu
+                    </button>
+                    <button onclick="clearToken()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition border border-slate-300">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs">
+                <div class="truncate max-w-2xl">
+                    <span class="text-slate-500 font-semibold">Active Token: </span>
+                    <span id="token-display" class="code-font text-slate-400 italic">Chưa có token (Vui lòng bấm Đăng nhập)</span>
+                </div>
+                <div id="user-info-display" class="font-medium text-slate-600">Người dùng: Chưa xác thực</div>
+            </div>
+        </section>
 
+        <!-- 3. Navigation Tabs -->
+        <div class="flex border-b border-slate-200">
+            <button id="tab-orders-btn" onclick="switchTab('orders')" class="py-3 px-6 text-sm font-bold border-b-2 border-sky-600 text-sky-600 flex items-center gap-2">
+                <i class="fa-solid fa-receipt"></i> 1. Danh Sách Đơn Hàng (<code class="code-font">/orders</code>)
+            </button>
+            <button id="tab-items-btn" onclick="switchTab('items')" class="py-3 px-6 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-boxes-stacked"></i> 2. Chi Tiết Mặt Hàng (<code class="code-font">/order_items</code>)
+            </button>
+        </div>
+
+        <!-- 4. Tab 1: Orders Section -->
+        <section id="tab-orders-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">Quản Lý Đơn Hàng (Bảng <code class="text-sky-700 code-font">orders</code>)</h2>
+                    <p class="text-xs text-slate-500">Gồm: <code class="code-font">id</code>, <code class="code-font">customer_name</code>, <code class="code-font">customer_email</code>, <code class="code-font">total_amount</code>, <code class="code-font">status</code> (pending, completed, cancelled)</p>
+                </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <button onclick="loadOrders()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border border-slate-300">
                         <i class="fa-solid fa-rotate"></i> Tải lại danh sách
                     </button>
                     <button onclick="openCreateOrderModal()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-cart-plus"></i> Tạo Đơn Hàng Mới
+                        <i class="fa-solid fa-plus"></i> Tạo Đơn Hàng Mới
                     </button>
-                </div>
-            </div>
-
-            <!-- Filters & Fast Test Scenarios -->
-            <div class="mb-5 p-3 bg-slate-50 border border-slate-200 rounded-lg flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div class="flex items-center gap-2">
-                    <span class="font-semibold text-slate-700"><i class="fa-solid fa-filter mr-1"></i> Lọc trạng thái:</span>
-                    <select id="filter-status" onchange="loadOrders()" class="bg-white border border-slate-300 rounded px-2.5 py-1 text-xs focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                    <select id="filter-status" onchange="loadOrders()" class="bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs focus:ring-1 focus:ring-sky-500 focus:outline-none">
                         <option value="">Tất cả trạng thái</option>
-                        <option value="pending">Chờ xác nhận (pending)</option>
-                        <option value="confirmed">Đã xác nhận (confirmed)</option>
-                        <option value="shipping">Đang giao hàng (shipping)</option>
-                        <option value="completed">Đã hoàn tất (completed)</option>
-                        <option value="cancelled">Đã hủy (cancelled)</option>
+                        <option value="pending">pending (Chờ xử lý)</option>
+                        <option value="completed">completed (Hoàn thành)</option>
+                        <option value="cancelled">cancelled (Đã hủy)</option>
                     </select>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2">
-                    <span class="font-semibold text-amber-800"><i class="fa-solid fa-vial mr-1"></i> Kịch bản SOA:</span>
-                    <button onclick="testWithoutToken()" class="px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-800 border border-amber-300 rounded font-medium transition">
-                        1. Gọi không có Token (401)
-                    </button>
-                    <button onclick="testExceedStockOrder()" class="px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-800 border border-amber-300 rounded font-medium transition">
-                        2. Đặt vượt tồn kho (422)
-                    </button>
-                    <button onclick="testNonexistentProductOrder()" class="px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-800 border border-amber-300 rounded font-medium transition">
-                        3. SP không tồn tại (404)
-                    </button>
                 </div>
             </div>
 
@@ -211,335 +146,251 @@
                 <table class="min-w-full divide-y divide-slate-200 text-sm">
                     <thead class="bg-slate-100 text-slate-700 font-semibold text-xs">
                         <tr>
-                            <th class="py-3 px-4 text-left w-16">ID Đơn</th>
-                            <th class="py-3 px-4 text-left">Khách hàng</th>
-                            <th class="py-3 px-4 text-left">Sản phẩm</th>
-                            <th class="py-3 px-4 text-center">SL</th>
-                            <th class="py-3 px-4 text-right">Đơn giá</th>
-                            <th class="py-3 px-4 text-right">Tổng tiền</th>
-                            <th class="py-3 px-4 text-center">Trạng thái</th>
-                            <th class="py-3 px-4 text-center">Thời gian</th>
-                            <th class="py-3 px-4 text-center w-40">Thao tác</th>
+                            <th class="py-3 px-4 text-left">ID</th>
+                            <th class="py-3 px-4 text-left">Khách Hàng</th>
+                            <th class="py-3 px-4 text-left">Email</th>
+                            <th class="py-3 px-4 text-left">Số Mặt Hàng</th>
+                            <th class="py-3 px-4 text-right">Tổng Tiền (total_amount)</th>
+                            <th class="py-3 px-4 text-center">Trạng Thái (status)</th>
+                            <th class="py-3 px-4 text-left">Thời Gian</th>
+                            <th class="py-3 px-4 text-center">Thao Tác</th>
                         </tr>
                     </thead>
                     <tbody id="orders-table-body" class="divide-y divide-slate-200 bg-white">
-                        <tr>
-                            <td colspan="9" class="py-8 text-center text-slate-400">
-                                <i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang tải danh sách đơn hàng...
-                            </td>
-                        </tr>
+                        <tr><td colspan="8" class="py-8 text-center text-slate-400">Đang nạp danh sách đơn hàng...</td></tr>
                     </tbody>
                 </table>
             </div>
+        </section>
 
-            <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
-                <span id="order-count-summary">Hiển thị 0 đơn hàng</span>
-                <span>RESTful APIs: <code class="code-font">GET /orders</code>, <code class="code-font">POST /orders</code>, <code class="code-font">PUT /orders/{id}</code>, <code class="code-font">DELETE /orders/{id}</code></span>
+        <!-- 5. Tab 2: Order Items Section -->
+        <section id="tab-items-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6 hidden">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">Chi Tiết Mặt Hàng Trong Đơn (Bảng <code class="text-sky-700 code-font">order_items</code>)</h2>
+                    <p class="text-xs text-slate-500">Gồm: <code class="code-font">id</code>, <code class="code-font">order_id</code>, <code class="code-font">product_id</code>, <code class="code-font">product_name</code>, <code class="code-font">quantity</code>, <code class="code-font">unit_price</code>, <code class="code-font">total_price</code></p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="loadOrderItems()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 border border-slate-300">
+                        <i class="fa-solid fa-rotate"></i> Tải lại mặt hàng
+                    </button>
+                    <button onclick="openAddItemModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-cart-plus"></i> Thêm Mặt Hàng Vào Đơn
+                    </button>
+                </div>
+            </div>
+
+            <!-- Order Items Table -->
+            <div class="overflow-x-auto rounded-lg border border-slate-200">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-100 text-slate-700 font-semibold text-xs">
+                        <tr>
+                            <th class="py-3 px-4 text-left">Item ID</th>
+                            <th class="py-3 px-4 text-left">Mã Đơn (order_id)</th>
+                            <th class="py-3 px-4 text-left">Mã SP (product_id)</th>
+                            <th class="py-3 px-4 text-left">Tên Sản Phẩm</th>
+                            <th class="py-3 px-4 text-center">Số Lượng</th>
+                            <th class="py-3 px-4 text-right">Đơn Giá (unit_price)</th>
+                            <th class="py-3 px-4 text-right">Thành Tiền (total_price)</th>
+                            <th class="py-3 px-4 text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-table-body" class="divide-y divide-slate-200 bg-white">
+                        <tr><td colspan="8" class="py-8 text-center text-slate-400">Đang nạp chi tiết mặt hàng...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
-        <!-- 4. Real-time API Monitor Console -->
-        <section id="console-section" class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 p-6 text-slate-100">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+        <!-- 6. Quick Scenario Tests -->
+        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2 mb-3">
+                <i class="fa-solid fa-flask-vial text-purple-600"></i> Kịch Bản Thử Nghiệm Nhanh SOA & Kiểm Soát Lỗi
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <button onclick="testWithoutToken()" class="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 text-left transition">
+                    <div class="text-xs font-bold text-rose-700">1. Không có Token</div>
+                    <div class="text-[11px] text-slate-500 mt-1">Gọi GET /orders không gửi Token -> Mong đợi 401 Unauthorized</div>
+                </button>
+                <button onclick="testExceedStockOrder()" class="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 text-left transition">
+                    <div class="text-xs font-bold text-amber-700">2. Mua vượt quá tồn kho</div>
+                    <div class="text-[11px] text-slate-500 mt-1">Đặt số lượng 99999 -> Mong đợi 422 Unprocessable</div>
+                </button>
+                <button onclick="testNonexistentProductOrder()" class="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 text-left transition">
+                    <div class="text-xs font-bold text-sky-700">3. Sản phẩm không tồn tại</div>
+                    <div class="text-[11px] text-slate-500 mt-1">Đặt product_id = 999999 -> Mong đợi 404 Not Found</div>
+                </button>
+                <button onclick="loadOrderItems()" class="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 text-left transition">
+                    <div class="text-xs font-bold text-emerald-700">4. GET /order_items</div>
+                    <div class="text-[11px] text-slate-500 mt-1">Lấy tất cả mặt hàng theo yêu cầu phụ lục đề bài</div>
+                </button>
+            </div>
+        </section>
+
+        <!-- 7. Console Log Section -->
+        <section id="console-section" class="bg-slate-900 rounded-xl shadow-lg border border-slate-800 p-5 text-white">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div class="flex items-center space-x-2">
-                    <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
-                    <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
-                    <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-                    <span class="text-xs font-semibold text-slate-400 ml-2">RESTful API Request / Response Monitor (SOA Inter-Service Tracing)</span>
+                    <i class="fa-solid fa-terminal text-amber-400"></i>
+                    <h3 class="font-bold text-sm tracking-wide">API Response Console (Real-time)</h3>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span id="api-method-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300">IDLE</span>
-                    <span id="api-status-badge" class="px-2 py-0.5 rounded text-xs font-bold bg-slate-800 text-slate-300">---</span>
-                </div>
+                <button onclick="clearConsole()" class="text-xs text-slate-400 hover:text-white transition">Xóa màn hình</button>
             </div>
-            <div class="text-xs code-font text-slate-400 mb-2 truncate">
-                <span class="text-slate-500">Target Endpoint: </span>
-                <span id="api-url-text" class="text-sky-400">Chưa có request nào</span>
-            </div>
-            <pre id="api-response-body" class="p-4 rounded-lg bg-slate-950 text-emerald-400 code-font text-xs overflow-x-auto max-h-80 border border-slate-800 leading-relaxed">// JSON Response sẽ xuất hiện tại đây khi bạn thao tác với giao diện hoặc gọi API...</pre>
+            <pre id="console-output" class="mt-4 p-4 bg-slate-950 rounded-lg code-font text-xs text-emerald-400 overflow-x-auto max-h-72 leading-relaxed">// Nhật ký phản hồi API...</pre>
         </section>
 
     </main>
 
-    <!-- Modal Create Order -->
-    <div id="order-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-cart-plus text-sky-600"></i> Tạo Đơn Hàng Mới (POST /orders)
-                </h3>
-                <button onclick="closeOrderModal()" class="text-slate-400 hover:text-slate-600 transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+    <!-- Modal: Tạo Đơn Hàng Mới -->
+    <div id="order-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-lg w-full mx-4 p-6">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800 text-base">Tạo Đơn Hàng Mới (POST /orders)</h3>
+                <button onclick="closeOrderModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <form onsubmit="handleCreateOrder(event)" class="p-6 space-y-4">
+            <form id="create-order-form" onsubmit="handleCreateOrder(event)" class="space-y-4 mt-4 text-xs">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">
-                        Chọn sản phẩm <span class="text-rose-500">*</span> (Lấy trực tiếp từ Product Service Port 8001)
-                    </label>
-                    <select id="form-order-product" required onchange="onProductSelectChange()" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                        <option value="">-- Đang nạp danh sách sản phẩm... --</option>
-                    </select>
+                    <label class="block font-semibold text-slate-700 mb-1">Tên khách hàng (customer_name) *</label>
+                    <input type="text" id="order-customer-name" value="Nguyễn Văn Sinh Viên" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
                 </div>
-
-                <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Email khách hàng (customer_email)</label>
+                    <input type="email" id="order-customer-email" value="student@example.com" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Số lượng mua <span class="text-rose-500">*</span></label>
-                        <input type="number" id="form-order-quantity" min="1" value="1" required class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                        <label class="block font-semibold text-slate-700 mb-1">Chọn sản phẩm (từ Product Service) *</label>
+                        <select id="order-product-select" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                            <option value="1">iPhone 15 Pro Max (ID 1)</option>
+                            <option value="3">Bàn phím cơ Keychron K2 Pro (ID 3)</option>
+                            <option value="4">Chuột không dây MX Master 3S (ID 4)</option>
+                            <option value="6">Tai nghe Sony WH-1000XM5 (ID 6)</option>
+                        </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tồn kho hiện tại</label>
-                        <input type="text" id="form-current-stock-display" readonly value="---" class="w-full px-3 py-2 text-sm bg-slate-100 border border-slate-300 rounded-lg font-bold text-slate-600">
+                        <label class="block font-semibold text-slate-700 mb-1">Số lượng mua (quantity) *</label>
+                        <input type="number" id="order-quantity" value="1" min="1" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
                     </div>
                 </div>
-
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tên người nhận</label>
-                    <input type="text" id="form-receiver-name" placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
+                    <label class="block font-semibold text-slate-700 mb-1">Địa chỉ giao hàng (shipping_address)</label>
+                    <input type="text" id="order-address" value="KTX Khu B ĐHQG" class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
                 </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Số điện thoại</label>
-                    <input type="text" id="form-receiver-phone" placeholder="Ví dụ: 0901234567" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">Địa chỉ giao hàng</label>
-                    <textarea id="form-shipping-address" rows="2" placeholder="Nhập địa chỉ nhận hàng..." class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:outline-none"></textarea>
-                </div>
-
-                <div class="pt-3 flex items-center justify-end gap-3 border-t border-slate-100">
-                    <button type="button" onclick="closeOrderModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition">
-                        Hủy
-                    </button>
-                    <button type="submit" class="px-5 py-2 text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 rounded-lg shadow-sm transition">
-                        Xác Nhận Đặt Hàng
-                    </button>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeOrderModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium">Hủy bỏ</button>
+                    <button type="submit" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-semibold shadow-sm">Xác nhận tạo đơn</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal View Order Detail -->
-    <div id="detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-200">
-            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
-                    <i class="fa-solid fa-circle-info text-sky-600"></i> Chi Tiết Đơn Hàng
-                </h3>
-                <button onclick="closeDetailModal()" class="text-slate-400 hover:text-slate-600 transition">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+    <!-- Modal: Thêm Mặt Hàng Vào Đơn (POST /order_items) -->
+    <div id="item-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-md w-full mx-4 p-6">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="font-bold text-slate-800 text-base">Thêm Mặt Hàng Vào Đơn (POST /order_items)</h3>
+                <button onclick="closeItemModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="detail-modal-content" class="p-6 space-y-4 text-sm">
-                <!-- Nội dung được nạp qua JS -->
-            </div>
-            <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 text-right">
-                <button onclick="closeDetailModal()" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold rounded-lg transition">Đóng</button>
-            </div>
+            <form id="create-item-form" onsubmit="handleCreateItem(event)" class="space-y-4 mt-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Mã đơn hàng (order_id) *</label>
+                    <input type="number" id="item-order-id" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Mã sản phẩm (product_id) *</label>
+                    <select id="item-product-id" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                        <option value="1">iPhone 15 Pro Max (ID 1)</option>
+                        <option value="3">Bàn phím cơ Keychron K2 Pro (ID 3)</option>
+                        <option value="4">Chuột không dây MX Master 3S (ID 4)</option>
+                        <option value="6">Tai nghe Sony WH-1000XM5 (ID 6)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Số lượng mua (quantity) *</label>
+                    <input type="number" id="item-quantity" value="1" min="1" required class="w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-1 focus:ring-sky-500 focus:outline-none">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeItemModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium">Hủy bỏ</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-sm">Thêm mặt hàng</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- JavaScript Application Logic -->
     <script>
-        const AUTH_BASE_URL = 'http://localhost:8000';
-        const PRODUCT_BASE_URL = 'http://localhost:8001';
-        const ORDER_BASE_URL = 'http://localhost:8002';
-
-        let currentToken = localStorage.getItem('soa_jwt_token') || '';
-        let availableProducts = [];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (currentToken) {
-                document.getElementById('current-token').value = currentToken;
-                updateAuthStatus(true, 'Token sẵn sàng');
-            } else {
-                updateAuthStatus(false, 'Chưa có Token');
-            }
-            checkServicesStatus();
-            loadProductsStock();
-            loadOrders();
-        });
-
-        function updateAuthStatus(isValid, label) {
-            const badge = document.getElementById('auth-status-badge');
-            if (isValid) {
-                badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300';
-                badge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i> ' + label;
-            } else {
-                badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300';
-                badge.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-600 mr-1"></i> ' + label;
-            }
-        }
-
-        async function checkServicesStatus() {
-            // Check Auth Service
-            try {
-                const res = await fetch(`${AUTH_BASE_URL}/`, { method: 'GET' });
-                document.getElementById('badge-auth-service').className = 'px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold';
-                document.getElementById('badge-auth-service').textContent = 'Đang Chạy (UP)';
-            } catch (e) {
-                document.getElementById('badge-auth-service').className = 'px-2.5 py-1 bg-rose-100 text-rose-800 rounded-full text-xs font-semibold';
-                document.getElementById('badge-auth-service').textContent = 'Không phản hồi';
-            }
-
-            // Check Product Service
-            try {
-                const res = await fetch(`${PRODUCT_BASE_URL}/health`, { method: 'GET' });
-                if (res.ok) {
-                    document.getElementById('badge-product-service').className = 'px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-semibold';
-                    document.getElementById('badge-product-service').textContent = 'Đang Chạy (UP)';
-                }
-            } catch (e) {
-                document.getElementById('badge-product-service').className = 'px-2.5 py-1 bg-rose-100 text-rose-800 rounded-full text-xs font-semibold';
-                document.getElementById('badge-product-service').textContent = 'Không phản hồi';
-            }
-        }
+        const AUTH_BASE_URL = 'http://127.0.0.1:8000';
+        const ORDER_BASE_URL = 'http://127.0.0.1:8002';
+        let currentToken = localStorage.getItem('soa_token') || '';
 
         function logConsole(method, url, status, data) {
-            const methodBadge = document.getElementById('api-method-badge');
-            const statusBadge = document.getElementById('api-status-badge');
-            const urlText = document.getElementById('api-url-text');
-            const bodyEl = document.getElementById('api-response-body');
+            const el = document.getElementById('console-output');
+            const time = new Date().toLocaleTimeString();
+            const logEntry = `[${time}] ${method} ${url} -> Status: ${status}\n` + JSON.stringify(data, null, 2) + '\n\n';
+            el.textContent = logEntry + el.textContent;
+        }
+        function clearConsole() { document.getElementById('console-output').textContent = '// Console cleared.'; }
 
-            methodBadge.textContent = method;
-            methodBadge.className = 'px-2 py-0.5 rounded text-xs font-bold ' + 
-                (method === 'GET' ? 'bg-sky-700 text-sky-100' : 
-                 method === 'POST' ? 'bg-emerald-700 text-emerald-100' :
-                 method === 'PUT' ? 'bg-amber-700 text-amber-100' : 'bg-rose-700 text-rose-100');
+        function switchTab(tab) {
+            const ordersSection = document.getElementById('tab-orders-section');
+            const itemsSection = document.getElementById('tab-items-section');
+            const ordersBtn = document.getElementById('tab-orders-btn');
+            const itemsBtn = document.getElementById('tab-items-btn');
 
-            statusBadge.textContent = status + (status >= 200 && status < 300 ? ' OK' : ' ERROR');
-            statusBadge.className = 'px-2 py-0.5 rounded text-xs font-bold ' +
-                (status >= 200 && status < 300 ? 'bg-emerald-700 text-emerald-100' : 'bg-rose-700 text-rose-100');
-
-            urlText.textContent = url;
-            bodyEl.textContent = JSON.stringify(data, null, 2);
+            if (tab === 'orders') {
+                ordersSection.classList.remove('hidden');
+                itemsSection.classList.add('hidden');
+                ordersBtn.className = 'py-3 px-6 text-sm font-bold border-b-2 border-sky-600 text-sky-600 flex items-center gap-2';
+                itemsBtn.className = 'py-3 px-6 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2';
+                loadOrders();
+            } else {
+                ordersSection.classList.add('hidden');
+                itemsSection.classList.remove('hidden');
+                itemsBtn.className = 'py-3 px-6 text-sm font-bold border-b-2 border-emerald-600 text-emerald-600 flex items-center gap-2';
+                ordersBtn.className = 'py-3 px-6 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2';
+                loadOrderItems();
+            }
         }
 
-        // 1. Đăng nhập Auth Service
-        async function loginAuthService() {
-            const userName = document.getElementById('auth-username').value.trim();
-            const rawPassword = document.getElementById('auth-password').value;
-            const base64Password = btoa(rawPassword);
-
+        async function loginSampleUser() {
             try {
-                const response = await fetch(`${AUTH_BASE_URL}/login`, {
+                const b64Password = btoa('123456');
+                const res = await fetch(`${AUTH_BASE_URL}/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                    body: JSON.stringify({ userName: userName, password: base64Password })
+                    body: JSON.stringify({ userName: 'student', password: b64Password })
                 });
+                const data = await res.json();
+                logConsole('POST', `${AUTH_BASE_URL}/login`, res.status, data);
 
-                const data = await response.json();
-                logConsole('POST', `${AUTH_BASE_URL}/login`, response.status, data);
-
-                if (response.ok && data.access_token) {
+                if (res.ok && data.access_token) {
                     currentToken = data.access_token;
-                    localStorage.setItem('soa_jwt_token', currentToken);
-                    document.getElementById('current-token').value = currentToken;
-                    document.getElementById('user-info-text').textContent = `${data.user?.UserName || userName} (ID: ${data.user?.IdUser || 1})`;
-                    updateAuthStatus(true, 'Đã xác thực JWT');
-                    alert('Đăng nhập thành công qua Auth Service (Port 8000)!');
-                    loadProductsStock();
+                    localStorage.setItem('soa_token', currentToken);
+                    document.getElementById('token-display').textContent = currentToken.substring(0, 30) + '... (Hợp lệ)';
+                    document.getElementById('auth-status-badge').className = 'px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium';
+                    document.getElementById('auth-status-badge').textContent = 'Đã xác thực JWT';
+                    document.getElementById('user-info-display').textContent = 'Người dùng: student (ID: 1)';
                     loadOrders();
                 } else {
-                    updateAuthStatus(false, 'Đăng nhập thất bại');
-                    alert('Đăng nhập thất bại: ' + (data.message || 'Lỗi không xác định'));
+                    alert('Đăng nhập thất bại: ' + (data.message || 'Lỗi server'));
                 }
             } catch (err) {
-                logConsole('POST', `${AUTH_BASE_URL}/login`, 0, { error: err.message });
-                alert('Không thể kết nối đến Auth Service tại ' + AUTH_BASE_URL);
+                alert('Không thể kết nối Auth Service (Port 8000): ' + err.message);
             }
         }
 
         function clearToken() {
             currentToken = '';
-            localStorage.removeItem('soa_jwt_token');
-            document.getElementById('current-token').value = '';
-            document.getElementById('user-info-text').textContent = 'Chưa xác thực';
-            updateAuthStatus(false, 'Chưa có Token');
-            alert('Đã xóa token hiện tại!');
+            localStorage.removeItem('soa_token');
+            document.getElementById('token-display').textContent = 'Chưa có token (Vui lòng bấm Đăng nhập)';
+            document.getElementById('auth-status-badge').className = 'px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium';
+            document.getElementById('auth-status-badge').textContent = 'Chờ đăng nhập';
+            document.getElementById('user-info-display').textContent = 'Người dùng: Chưa xác thực';
         }
 
-        // 2. Nạp tồn kho từ Product Service
-        async function loadProductsStock() {
-            const listEl = document.getElementById('product-stock-list');
-            try {
-                const headers = { 'Accept': 'application/json' };
-                if (currentToken) headers['Authorization'] = 'Bearer ' + currentToken;
-
-                const response = await fetch(`${PRODUCT_BASE_URL}/products`, { headers });
-                const data = await response.json();
-
-                if (response.ok && data.data) {
-                    availableProducts = data.data;
-                    renderProductsStock();
-                    updateProductSelectDropdown();
-                } else {
-                    listEl.innerHTML = `<div class="text-xs text-center text-amber-600 py-4"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Chưa lấy được tồn kho: ${data.message || 'Cần bật Product Service và đăng nhập'}</div>`;
-                }
-            } catch (err) {
-                listEl.innerHTML = `<div class="text-xs text-center text-rose-500 py-4"><i class="fa-solid fa-circle-exclamation mr-1"></i> Không thể kết nối Product Service (Port 8001)</div>`;
-            }
-        }
-
-        function renderProductsStock() {
-            const listEl = document.getElementById('product-stock-list');
-            if (availableProducts.length === 0) {
-                listEl.innerHTML = `<div class="text-xs text-center text-slate-400 py-4">Kho hàng hiện không có sản phẩm nào.</div>`;
-                return;
-            }
-
-            listEl.innerHTML = availableProducts.map(p => `
-                <div class="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition">
-                    <div class="truncate pr-2">
-                        <span class="text-xs font-bold text-slate-700">#${p.id} ${escapeHtml(p.name)}</span>
-                        <div class="text-xs text-emerald-600 font-semibold">${formatCurrency(p.price)}</div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs px-2.5 py-0.5 rounded-full font-bold ${p.quantity > 5 ? 'bg-emerald-100 text-emerald-800' : p.quantity > 0 ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}">
-                            Tồn: ${p.quantity}
-                        </span>
-                        <button onclick="quickOrder(${p.id})" class="px-2 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded text-xs font-semibold shadow-xs">
-                            Đặt
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updateProductSelectDropdown() {
-            const selectEl = document.getElementById('form-order-product');
-            if (availableProducts.length === 0) {
-                selectEl.innerHTML = `<option value="">-- Không có sản phẩm nào --</option>`;
-                return;
-            }
-
-            selectEl.innerHTML = `<option value="">-- Chọn sản phẩm cần đặt --</option>` + 
-                availableProducts.map(p => `
-                    <option value="${p.id}" data-stock="${p.quantity}" data-price="${p.price}">
-                        #${p.id} ${escapeHtml(p.name)} (Giá: ${formatCurrency(p.price)} - Còn: ${p.quantity})
-                    </option>
-                `).join('');
-        }
-
-        function onProductSelectChange() {
-            const selectEl = document.getElementById('form-order-product');
-            const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            const stock = selectedOpt.getAttribute('data-stock');
-            document.getElementById('form-current-stock-display').value = stock ? `${stock} sản phẩm` : '---';
-        }
-
-        function quickOrder(productId) {
-            openCreateOrderModal();
-            const selectEl = document.getElementById('form-order-product');
-            selectEl.value = productId;
-            onProductSelectChange();
-        }
-
-        // 3. Tải danh sách đơn hàng (GET /orders)
         async function loadOrders() {
             const tbody = document.getElementById('orders-table-body');
-            tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang nạp danh sách đơn hàng...</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang nạp danh sách đơn hàng...</td></tr>`;
 
             const status = document.getElementById('filter-status').value;
             let url = `${ORDER_BASE_URL}/orders`;
@@ -548,260 +399,188 @@
             try {
                 const headers = { 'Accept': 'application/json' };
                 if (currentToken) headers['Authorization'] = 'Bearer ' + currentToken;
+                const res = await fetch(url, { headers });
+                const data = await res.json();
+                logConsole('GET', url, res.status, data);
 
-                const response = await fetch(url, { headers });
-                const data = await response.json();
-                logConsole('GET', url, response.status, data);
-
-                if (!response.ok) {
-                    tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-rose-500 font-medium"><i class="fa-solid fa-triangle-exclamation mr-2"></i> ${data.message || 'Lỗi tải đơn hàng'} (HTTP ${response.status})</td></tr>`;
-                    document.getElementById('order-count-summary').textContent = 'Truy cập thất bại';
+                if (!res.ok) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-rose-600 font-medium">${escapeHtml(data.message || 'Lỗi tải danh sách')}</td></tr>`;
                     return;
                 }
 
                 const orders = data.data || [];
-                document.getElementById('order-count-summary').textContent = `Hiển thị ${orders.length} đơn hàng`;
-
                 if (orders.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-400"><i class="fa-solid fa-box-open mr-2"></i> Không có đơn hàng nào.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Không có đơn hàng nào.</td></tr>`;
                     return;
                 }
 
                 tbody.innerHTML = orders.map(o => `
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="py-3 px-4 font-bold text-slate-700">#${o.id}</td>
-                        <td class="py-3 px-4">
-                            <div class="font-medium text-slate-800">${escapeHtml(o.receiver_name || o.user_name || 'Khách hàng')}</div>
-                            <div class="text-xs text-slate-400">${escapeHtml(o.receiver_phone || '')}</div>
-                        </td>
-                        <td class="py-3 px-4 font-medium text-slate-900">
-                            <span class="text-xs text-slate-400 mr-1">#${o.product_id}</span>${escapeHtml(o.product_name)}
-                        </td>
-                        <td class="py-3 px-4 text-center font-bold text-slate-700">${o.quantity}</td>
-                        <td class="py-3 px-4 text-right text-xs text-slate-500">${formatCurrency(o.unit_price)}</td>
-                        <td class="py-3 px-4 text-right font-bold text-emerald-600">${formatCurrency(o.total_price)}</td>
-                        <td class="py-3 px-4 text-center">${getStatusBadge(o.status)}</td>
-                        <td class="py-3 px-4 text-center text-xs text-slate-400">${formatDate(o.created_at)}</td>
+                        <td class="py-3 px-4 font-bold text-sky-700">#${o.id}</td>
+                        <td class="py-3 px-4 font-medium text-slate-800">${escapeHtml(o.customer_name)}</td>
+                        <td class="py-3 px-4 text-slate-500">${escapeHtml(o.customer_email || '---')}</td>
+                        <td class="py-3 px-4 text-slate-600">${o.items ? o.items.length : 0} mặt hàng</td>
+                        <td class="py-3 px-4 text-right font-bold text-slate-900">${formatCurrency(o.total_amount)}</td>
                         <td class="py-3 px-4 text-center">
-                            <div class="flex items-center justify-center space-x-1">
-                                <button onclick="viewOrderDetail(${o.id})" class="p-1.5 text-sky-600 hover:bg-sky-50 rounded transition" title="Xem chi tiết">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
-                                <button onclick="changeOrderStatusPrompt(${o.id}, '${o.status}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded transition" title="Đổi trạng thái">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
-                                ${o.status !== 'cancelled' ? `
-                                    <button onclick="cancelOrder(${o.id})" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded transition" title="Hủy đơn (Tự động hoàn kho)">
-                                        <i class="fa-solid fa-ban"></i>
-                                    </button>
-                                ` : ''}
-                                <button onclick="deleteOrder(${o.id})" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition" title="Xóa đơn">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusBadge(o.status)}">${escapeHtml(o.status)}</span>
+                        </td>
+                        <td class="py-3 px-4 text-xs text-slate-400">${formatDate(o.created_at)}</td>
+                        <td class="py-3 px-4 text-center space-x-1.5">
+                            ${o.status !== 'cancelled' ? `<button onclick="updateOrderStatus(${o.id}, 'completed')" class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-xs">Hoàn thành</button>` : ''}
+                            ${o.status !== 'cancelled' ? `<button onclick="updateOrderStatus(${o.id}, 'cancelled')" class="px-2 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded text-xs">Hủy (Hoàn kho)</button>` : ''}
+                            <button onclick="deleteOrder(${o.id})" class="px-2 py-1 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded text-xs">Xóa</button>
                         </td>
                     </tr>
                 `).join('');
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-rose-500 font-medium">Lỗi kết nối tới Order Service (Port 8002): ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-rose-600">Lỗi kết nối Order Service: ${err.message}</td></tr>`;
             }
         }
 
-        function getStatusBadge(status) {
-            switch(status) {
-                case 'pending': return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">Chờ duyệt</span>`;
-                case 'confirmed': return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800">Đã duyệt</span>`;
-                case 'shipping': return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">Đang giao</span>`;
-                case 'completed': return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">Hoàn tất</span>`;
-                case 'cancelled': return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">Đã hủy</span>`;
-                default: return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">${status}</span>`;
+        async function loadOrderItems() {
+            const tbody = document.getElementById('items-table-body');
+            tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang nạp danh sách chi tiết mặt hàng...</td></tr>`;
+
+            const url = `${ORDER_BASE_URL}/order_items`;
+            try {
+                const headers = { 'Accept': 'application/json' };
+                if (currentToken) headers['Authorization'] = 'Bearer ' + currentToken;
+                const res = await fetch(url, { headers });
+                const data = await res.json();
+                logConsole('GET', url, res.status, data);
+
+                if (!res.ok) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-rose-600 font-medium">${escapeHtml(data.message || 'Lỗi tải mặt hàng')}</td></tr>`;
+                    return;
+                }
+
+                const items = data.data || [];
+                if (items.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400">Không có mặt hàng nào.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = items.map(item => `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-3 px-4 font-bold text-emerald-700">#${item.id}</td>
+                        <td class="py-3 px-4 text-sky-700 font-semibold">Đơn #${item.order_id}</td>
+                        <td class="py-3 px-4 text-slate-600">SP #${item.product_id}</td>
+                        <td class="py-3 px-4 font-medium text-slate-800">${escapeHtml(item.product_name)}</td>
+                        <td class="py-3 px-4 text-center font-bold">${item.quantity}</td>
+                        <td class="py-3 px-4 text-right text-slate-600">${formatCurrency(item.unit_price)}</td>
+                        <td class="py-3 px-4 text-right font-bold text-slate-900">${formatCurrency(item.total_price)}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="deleteOrderItem(${item.id})" class="px-2 py-1 bg-rose-100 hover:bg-rose-200 text-rose-800 rounded text-xs">Xóa</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-rose-600">Lỗi kết nối Order Service: ${err.message}</td></tr>`;
             }
         }
 
-        // 4. Tạo đơn hàng mới (POST /orders)
         async function handleCreateOrder(e) {
             e.preventDefault();
-            const productId = parseInt(document.getElementById('form-order-product').value, 10);
-            const quantity = parseInt(document.getElementById('form-order-quantity').value, 10);
-            const receiverName = document.getElementById('form-receiver-name').value.trim();
-            const receiverPhone = document.getElementById('form-receiver-phone').value.trim();
-            const shippingAddress = document.getElementById('form-shipping-address').value.trim();
+            const payload = {
+                customer_name: document.getElementById('order-customer-name').value,
+                customer_email: document.getElementById('order-customer-email').value,
+                product_id: parseInt(document.getElementById('order-product-select').value),
+                quantity: parseInt(document.getElementById('order-quantity').value),
+                shipping_address: document.getElementById('order-address').value,
+            };
 
-            if (!productId) {
-                alert('Vui lòng chọn sản phẩm!');
-                return;
-            }
+            const url = `${ORDER_BASE_URL}/orders`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + currentToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            logConsole('POST', url, res.status, data);
 
-            try {
-                const response = await fetch(`${ORDER_BASE_URL}/orders`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': 'Bearer ' + currentToken,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        quantity: quantity,
-                        receiver_name: receiverName,
-                        receiver_phone: receiverPhone,
-                        shipping_address: shippingAddress,
-                    })
-                });
-
-                const data = await response.json();
-                logConsole('POST', `${ORDER_BASE_URL}/orders`, response.status, data);
-
-                if (response.ok) {
-                    alert('🎉 Tạo đơn hàng thành công! Tồn kho tại Product Service đã được tự động trừ.');
-                    closeOrderModal();
-                    loadOrders();
-                    loadProductsStock(); // Cập nhật lại danh sách tồn kho
-                } else {
-                    alert('⚠️ Lỗi tạo đơn hàng (' + response.status + '): ' + (data.message || JSON.stringify(data)));
-                }
-            } catch (err) {
-                alert('Lỗi kết nối: ' + err.message);
+            if (res.ok) {
+                alert('Tạo đơn hàng thành công!');
+                closeOrderModal();
+                loadOrders();
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể tạo đơn hàng'));
             }
         }
 
-        // 5. Cập nhật trạng thái / Hủy đơn hàng (PUT /orders/{id})
-        async function changeOrderStatusPrompt(id, currentStatus) {
-            const nextStatus = prompt(`Nhập trạng thái mới cho đơn hàng #${id} (pending, confirmed, shipping, completed, cancelled):`, currentStatus);
-            if (!nextStatus || nextStatus === currentStatus) return;
+        async function handleCreateItem(e) {
+            e.preventDefault();
+            const payload = {
+                order_id: parseInt(document.getElementById('item-order-id').value),
+                product_id: parseInt(document.getElementById('item-product-id').value),
+                quantity: parseInt(document.getElementById('item-quantity').value),
+            };
 
-            try {
-                const response = await fetch(`${ORDER_BASE_URL}/orders/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': 'Bearer ' + currentToken,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ status: nextStatus })
-                });
+            const url = `${ORDER_BASE_URL}/order_items`;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + currentToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            logConsole('POST', url, res.status, data);
 
-                const data = await response.json();
-                logConsole('PUT', `${ORDER_BASE_URL}/orders/${id}`, response.status, data);
-
-                if (response.ok) {
-                    alert(`Đã cập nhật trạng thái đơn hàng #${id} sang "${nextStatus}"!`);
-                    loadOrders();
-                    loadProductsStock();
-                } else {
-                    alert('Lỗi cập nhật: ' + (data.message || response.statusText));
-                }
-            } catch (err) {
-                alert('Lỗi kết nối: ' + err.message);
+            if (res.ok) {
+                alert('Thêm mặt hàng thành công!');
+                closeItemModal();
+                loadOrderItems();
+            } else {
+                alert('Lỗi: ' + (data.message || 'Không thể thêm mặt hàng'));
             }
         }
 
-        async function cancelOrder(id) {
-            if (!confirm(`Bạn có chắc muốn HỦY đơn hàng #${id}? Số lượng sản phẩm sẽ được tự động hoàn lại vào kho của Product Service.`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`${ORDER_BASE_URL}/orders/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': 'Bearer ' + currentToken,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                    },
-                    body: JSON.stringify({ status: 'cancelled' })
-                });
-
-                const data = await response.json();
-                logConsole('PUT', `${ORDER_BASE_URL}/orders/${id}`, response.status, data);
-
-                if (response.ok) {
-                    alert(`Đã hủy đơn hàng #${id}. Số lượng sản phẩm đã được tự động hoàn vào kho!`);
-                    loadOrders();
-                    loadProductsStock();
-                } else {
-                    alert('Lỗi hủy đơn: ' + data.message);
-                }
-            } catch (err) {
-                alert('Lỗi kết nối: ' + err.message);
-            }
+        async function updateOrderStatus(id, newStatus) {
+            const url = `${ORDER_BASE_URL}/orders/${id}`;
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': 'Bearer ' + currentToken,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const data = await res.json();
+            logConsole('PUT', url, res.status, data);
+            loadOrders();
         }
 
-        // 6. Xóa đơn hàng (DELETE /orders/{id})
         async function deleteOrder(id) {
-            if (!confirm(`Xóa hoàn toàn đơn hàng #${id}?`)) return;
-
-            try {
-                const response = await fetch(`${ORDER_BASE_URL}/orders/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': 'Bearer ' + currentToken,
-                        'Accept': 'application/json',
-                    }
-                });
-
-                const data = await response.json();
-                logConsole('DELETE', `${ORDER_BASE_URL}/orders/${id}`, response.status, data);
-
-                if (response.ok) {
-                    alert(`Đã xóa đơn hàng #${id}!`);
-                    loadOrders();
-                    loadProductsStock();
-                } else {
-                    alert('Lỗi xóa: ' + data.message);
-                }
-            } catch (err) {
-                alert('Lỗi kết nối: ' + err.message);
-            }
+            if (!confirm(`Bạn có chắc muốn xóa đơn hàng #${id}?`)) return;
+            const url = `${ORDER_BASE_URL}/orders/${id}`;
+            const res = await fetch(url, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + currentToken, 'Accept': 'application/json' }
+            });
+            const data = await res.json();
+            logConsole('DELETE', url, res.status, data);
+            loadOrders();
         }
 
-        // 7. Xem chi tiết đơn hàng (GET /orders/{id})
-        async function viewOrderDetail(id) {
-            try {
-                const response = await fetch(`${ORDER_BASE_URL}/orders/${id}`, {
-                    headers: { 'Authorization': 'Bearer ' + currentToken, 'Accept': 'application/json' }
-                });
-                const data = await response.json();
-                logConsole('GET', `${ORDER_BASE_URL}/orders/${id}`, response.status, data);
-
-                if (response.ok && data.data) {
-                    const o = data.data;
-                    document.getElementById('detail-modal-content').innerHTML = `
-                        <div class="bg-sky-50 p-4 rounded-lg border border-sky-100 flex items-center justify-between">
-                            <div>
-                                <span class="text-xs font-bold text-sky-600 uppercase">Mã Đơn: #${o.id}</span>
-                                <h4 class="text-base font-bold text-slate-800">${escapeHtml(o.product_name)}</h4>
-                            </div>
-                            <div>${getStatusBadge(o.status)}</div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="p-3 bg-slate-50 rounded border border-slate-200">
-                                <span class="text-xs text-slate-500 block">Số lượng mua:</span>
-                                <span class="text-base font-bold text-slate-800">${o.quantity} sản phẩm</span>
-                            </div>
-                            <div class="p-3 bg-slate-50 rounded border border-slate-200">
-                                <span class="text-xs text-slate-500 block">Tổng tiền đơn:</span>
-                                <span class="text-base font-bold text-emerald-600">${formatCurrency(o.total_price)}</span>
-                            </div>
-                        </div>
-                        <div class="space-y-1 text-xs text-slate-600 bg-slate-50 p-3 rounded border border-slate-200">
-                            <div><strong>Người nhận:</strong> ${escapeHtml(o.receiver_name || o.user_name || '---')}</div>
-                            <div><strong>Số điện thoại:</strong> ${escapeHtml(o.receiver_phone || '---')}</div>
-                            <div><strong>Địa chỉ giao:</strong> ${escapeHtml(o.shipping_address || '---')}</div>
-                            <div><strong>Ghi chú:</strong> ${escapeHtml(o.notes || 'Không có')}</div>
-                        </div>
-                        <div class="text-xs text-slate-400">
-                            <i class="fa-regular fa-clock mr-1"></i> Ngày tạo đơn: ${formatDate(o.created_at)}
-                        </div>
-                    `;
-                    document.getElementById('detail-modal').classList.remove('hidden');
-                }
-            } catch (err) {
-                alert('Lỗi nạp chi tiết: ' + err.message);
-            }
+        async function deleteOrderItem(id) {
+            if (!confirm(`Bạn có chắc muốn xóa mặt hàng #${id}?`)) return;
+            const url = `${ORDER_BASE_URL}/order_items/${id}`;
+            const res = await fetch(url, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + currentToken, 'Accept': 'application/json' }
+            });
+            const data = await res.json();
+            logConsole('DELETE', url, res.status, data);
+            loadOrderItems();
         }
 
-        // 8. Thử nghiệm nhanh các kịch bản SOA
         async function testWithoutToken() {
             const url = `${ORDER_BASE_URL}/orders`;
             const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
@@ -813,11 +592,7 @@
             const url = `${ORDER_BASE_URL}/orders`;
             const res = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + currentToken,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
+                headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({ product_id: 1, quantity: 999999 })
             });
             const data = await res.json();
@@ -828,27 +603,40 @@
             const url = `${ORDER_BASE_URL}/orders`;
             const res = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + currentToken,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
+                headers: { 'Authorization': 'Bearer ' + currentToken, 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify({ product_id: 999999, quantity: 1 })
             });
             const data = await res.json();
             logConsole('POST', url, res.status, data);
         }
 
-        // Modals & Utilities
         function openCreateOrderModal() { document.getElementById('order-modal').classList.remove('hidden'); }
         function closeOrderModal() { document.getElementById('order-modal').classList.add('hidden'); }
-        function closeDetailModal() { document.getElementById('detail-modal').classList.add('hidden'); }
+        function openAddItemModal() { document.getElementById('item-modal').classList.remove('hidden'); }
+        function closeItemModal() { document.getElementById('item-modal').classList.add('hidden'); }
         function formatCurrency(val) { return Number(val).toLocaleString('vi-VN') + ' ₫'; }
         function formatDate(val) { return val ? new Date(val).toLocaleString('vi-VN') : '---'; }
+        function getStatusBadge(status) {
+            switch (status) {
+                case 'completed': return 'bg-emerald-100 text-emerald-800';
+                case 'cancelled': return 'bg-rose-100 text-rose-800';
+                default: return 'bg-amber-100 text-amber-800';
+            }
+        }
         function escapeHtml(str) {
             if (!str) return '';
             return String(str).replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
         }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            if (currentToken) {
+                document.getElementById('token-display').textContent = currentToken.substring(0, 30) + '... (Lưu từ trước)';
+                document.getElementById('auth-status-badge').className = 'px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-medium';
+                document.getElementById('auth-status-badge').textContent = 'Đã có Token';
+            }
+            loadOrders();
+        });
     </script>
 </body>
 </html>

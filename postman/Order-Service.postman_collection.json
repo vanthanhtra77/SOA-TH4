@@ -1,322 +1,565 @@
 {
-  "info": {
-    "_postman_id": "c4d5e6f7-a1b2-4c3d-8e9f-0123456789ab",
-    "name": "SOA - Bài Thực Hành Số 4: Order Management Service",
-    "description": "Bộ sưu tập kiểm thử RESTful API Dịch vụ Quản lý Đơn hàng (Port 8002) với CSDL riêng, kiểm tra tồn kho từ Product Service (Port 8001) và xác thực qua Auth Service (Port 8000).",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "variable": [
-    {
-      "key": "auth_url",
-      "value": "http://localhost:8000",
-      "type": "string"
-    },
-    {
-      "key": "product_url",
-      "value": "http://localhost:8001",
-      "type": "string"
-    },
-    {
-      "key": "order_url",
-      "value": "http://localhost:8002",
-      "type": "string"
-    },
-    {
-      "key": "token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "created_order_id",
-      "value": "1",
-      "type": "string"
-    }
-  ],
-  "item": [
-    {
-      "name": "1. Xác thực qua Auth Service (Port 8000)",
-      "item": [
-        {
-          "name": "1.1 Đăng nhập lấy Token (POST /login)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "var jsonData = pm.response.json();",
-                  "pm.test(\"Đăng nhập thành công 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});",
-                  "if (jsonData.access_token) {",
-                  "    pm.collectionVariables.set(\"token\", jsonData.access_token);",
-                  "    console.log(\"Đã lưu token:\", jsonData.access_token);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"userName\": \"student\",\n    \"password\": \"MTIzNDU2\"\n}"
-            },
-            "url": {
-              "raw": "{{auth_url}}/login",
-              "host": ["{{auth_url}}"],
-              "path": ["login"]
-            }
-          }
-        },
-        {
-          "name": "1.2 Kiểm tra Token với Auth Service (GET /auth)",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{auth_url}}/auth",
-              "host": ["{{auth_url}}"],
-              "path": ["auth"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "2. Kiểm tra tồn kho tại Product Service (Port 8001)",
-      "item": [
-        {
-          "name": "2.1 Lấy danh sách sản phẩm & số lượng tồn kho (GET /products)",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{product_url}}/products",
-              "host": ["{{product_url}}"],
-              "path": ["products"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "3. Order Service CRUD & Stock Control (Port 8002)",
-      "item": [
-        {
-          "name": "3.1 Lấy danh sách đơn hàng (GET /orders)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Status code là 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{order_url}}/orders",
-              "host": ["{{order_url}}"],
-              "path": ["orders"]
-            }
-          }
-        },
-        {
-          "name": "3.2 Tạo đơn hàng mới (POST /orders - Tự động trừ tồn kho)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Tạo đơn thành công 201 Created\", function () {",
-                  "    pm.response.to.have.status(201);",
-                  "});",
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData.data && jsonData.data.id) {",
-                  "    pm.collectionVariables.set(\"created_order_id\", jsonData.data.id.toString());",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"product_id\": 1,\n    \"quantity\": 1,\n    \"receiver_name\": \"Nguyễn Văn A\",\n    \"receiver_phone\": \"0901234567\",\n    \"shipping_address\": \"123 Lê Lợi, Q1, TP.HCM\",\n    \"notes\": \"Giao giờ hành chính\"\n}"
-            },
-            "url": {
-              "raw": "{{order_url}}/orders",
-              "host": ["{{order_url}}"],
-              "path": ["orders"]
-            }
-          }
-        },
-        {
-          "name": "3.3 Xem chi tiết đơn hàng (GET /orders/:id)",
-          "request": {
-            "method": "GET",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{order_url}}/orders/{{created_order_id}}",
-              "host": ["{{order_url}}"],
-              "path": ["orders", "{{created_order_id}}"]
-            }
-          }
-        },
-        {
-          "name": "3.4 Cập nhật trạng thái đơn hàng (PUT /orders/:id)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"status\": \"confirmed\"\n}"
-            },
-            "url": {
-              "raw": "{{order_url}}/orders/{{created_order_id}}",
-              "host": ["{{order_url}}"],
-              "path": ["orders", "{{created_order_id}}"]
-            }
-          }
-        },
-        {
-          "name": "3.5 Hủy đơn hàng (PUT /orders/:id - Tự hoàn tồn kho)",
-          "request": {
-            "method": "PUT",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"status\": \"cancelled\"\n}"
-            },
-            "url": {
-              "raw": "{{order_url}}/orders/{{created_order_id}}",
-              "host": ["{{order_url}}"],
-              "path": ["orders", "{{created_order_id}}"]
-            }
-          }
-        },
-        {
-          "name": "3.6 Xóa đơn hàng (DELETE /orders/:id)",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "url": {
-              "raw": "{{order_url}}/orders/{{created_order_id}}",
-              "host": ["{{order_url}}"],
-              "path": ["orders", "{{created_order_id}}"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "4. Kiểm thử các trường hợp lỗi (Error Cases)",
-      "item": [
-        {
-          "name": "4.1 Không có Token (401 Unauthorized)",
-          "request": {
-            "method": "GET",
-            "header": [{ "key": "Accept", "value": "application/json" }],
-            "url": {
-              "raw": "{{order_url}}/orders",
-              "host": ["{{order_url}}"],
-              "path": ["orders"]
-            }
-          }
-        },
-        {
-          "name": "4.2 Đặt mua vượt quá số lượng tồn kho (422 Unprocessable)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"product_id\": 1,\n    \"quantity\": 999999\n}"
-            },
-            "url": {
-              "raw": "{{order_url}}/orders",
-              "host": ["{{order_url}}"],
-              "path": ["orders"]
-            }
-          }
-        },
-        {
-          "name": "4.3 Đặt mua sản phẩm không tồn tại (404 Not Found)",
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Accept", "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"product_id\": 999999,\n    \"quantity\": 1\n}"
-            },
-            "url": {
-              "raw": "{{order_url}}/orders",
-              "host": ["{{order_url}}"],
-              "path": ["orders"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "5. Health Check (GET /health)",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{order_url}}/health",
-          "host": ["{{order_url}}"],
-          "path": ["health"]
-        }
-      }
-    }
-  ]
+	"info": {
+		"_postman_id": "c88f172a-9e12-421b-871d-orders-service",
+		"name": "SOA TH4 - Order Management Service (Port 8002)",
+		"description": "Bộ sưu tập kiểm thử RESTful API đầy đủ cho Bài Thực Hành Số 4: Quản lý đơn hàng (orders) và chi tiết mặt hàng (order_items) theo kiến trúc SOA.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "order_url",
+			"value": "http://127.0.0.1:8002",
+			"type": "string"
+		},
+		{
+			"key": "auth_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "created_order_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "created_item_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Xác thực qua Auth Service (Port 8000)",
+			"item": [
+				{
+					"name": "1.1 Đăng nhập lấy Token (POST /login)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set('token', jsonData.access_token);",
+									"    console.log('Saved token: ' + jsonData.access_token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userName\": \"student\",\n    \"password\": \"MTIzNDU2\"\n}"
+						},
+						"url": {
+							"raw": "{{auth_url}}/login",
+							"host": [
+								"{{auth_url}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Kiểm tra Token với Auth Service (GET /auth)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{auth_url}}/auth",
+							"host": [
+								"{{auth_url}}"
+							],
+							"path": [
+								"auth"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Quản lý Đơn hàng (Orders - Port 8002)",
+			"item": [
+				{
+					"name": "2.1 Lấy danh sách tất cả đơn hàng (GET /orders)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/orders",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Xem chi tiết một đơn hàng (GET /orders/:id)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/orders/1",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Tạo đơn hàng mới (POST /orders)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.id) {",
+									"    pm.collectionVariables.set('created_order_id', jsonData.data.id);",
+									"    console.log('Created order ID: ' + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customer_name\": \"Nguyễn Văn A\",\n    \"customer_email\": \"nguyenvana@example.com\",\n    \"product_id\": 1,\n    \"quantity\": 1,\n    \"shipping_address\": \"123 Lê Lợi, TP. Hồ Chí Minh\",\n    \"notes\": \"Đơn hàng mẫu tạo từ Postman\"\n}"
+						},
+						"url": {
+							"raw": "{{order_url}}/orders",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 Cập nhật trạng thái đơn hàng (PUT /orders/:id)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"completed\"\n}"
+						},
+						"url": {
+							"raw": "{{order_url}}/orders/{{created_order_id}}",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders",
+								"{{created_order_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.5 Xóa một đơn hàng (DELETE /orders/:id)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/orders/{{created_order_id}}",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders",
+								"{{created_order_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Quản lý Chi tiết Đơn hàng (Order Items - Port 8002)",
+			"item": [
+				{
+					"name": "3.1 Lấy danh sách mặt hàng (GET /order_items)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/order_items",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"order_items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Xem chi tiết một mặt hàng (GET /order_items/:id)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/order_items/1",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"order_items",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 Thêm mặt hàng mới vào đơn (POST /order_items)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.data && jsonData.data.id) {",
+									"    pm.collectionVariables.set('created_item_id', jsonData.data.id);",
+									"    console.log('Created item ID: ' + jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": 1,\n    \"product_id\": 3,\n    \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{order_url}}/order_items",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"order_items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.4 Cập nhật số lượng mặt hàng (PUT /order_items/:id)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{order_url}}/order_items/{{created_item_id}}",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"order_items",
+								"{{created_item_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.5 Xóa một mặt hàng khỏi đơn (DELETE /order_items/:id)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/order_items/{{created_item_id}}",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"order_items",
+								"{{created_item_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Kiểm thử Bảo mật & Ngoại lệ",
+			"item": [
+				{
+					"name": "4.1 Không có Bearer Token (401)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/orders",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Token giả mạo (401)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer token-gia-mao-12345"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/orders",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Đơn hàng không tồn tại (404)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{order_url}}/orders/999999",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders",
+								"999999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Đặt hàng vượt quá tồn kho (422)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": 1,\n    \"quantity\": 999999\n}"
+						},
+						"url": {
+							"raw": "{{order_url}}/orders",
+							"host": [
+								"{{order_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
 }

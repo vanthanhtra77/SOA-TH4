@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Services\ProductServiceClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,31 +20,32 @@ class OrderController extends Controller
 
     /**
      * GET /orders
-     * Lấy danh sách tất cả các đơn hàng (hỗ trợ lọc theo status, user_id, product_id)
+     * Lấy danh sách tất cả các đơn hàng (kèm chi tiết các mặt hàng trong đơn)
      *
      * @param Request $request
      * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Order::query();
+        $query = Order::with('items');
 
-        // Lọc theo trạng thái đơn hàng (pending, confirmed, shipping, completed, cancelled)
+        // Lọc theo trạng thái đơn hàng (pending, completed, cancelled)
         if ($status = $request->query('status')) {
             $query->where('status', $status);
         }
 
-        // Lọc theo user_id
-        if ($userId = $request->query('user_id')) {
-            $query->where('user_id', $userId);
+        // Lọc theo tên khách hàng
+        if ($customerName = $request->query('customer_name') ?? $request->query('name')) {
+            $query->where('customer_name', 'like', "%{$customerName}%");
         }
 
-        // Lọc theo product_id
+        // Lọc theo product_id thông qua order_items
         if ($productId = $request->query('product_id')) {
-            $query->where('product_id', $productId);
+            $query->whereHas('items', function ($q) use ($productId) {
+                $q->where('product_id', $productId);
+            });
         }
 
-        // Sắp xếp đơn hàng mới nhất lên đầu
         $orders = $query->orderBy('id', 'desc')->get();
 
         return response()->json([
@@ -63,7 +65,7 @@ class OrderController extends Controller
      */
     public function show($id): JsonResponse
     {
-        $order = Order::find($id);
+        $order = Order::with('items')->find($id);
 
         if (!$order) {
             return response()->json([
@@ -81,7 +83,8 @@ class OrderController extends Controller
 
     /**
      * POST /orders
-     * Tạo một đơn hàng mới (Tuân theo SOA: Kiểm tra tồn kho và trừ kho từ Product Service)
+     * Tạo đơn hàng mới (Tuân thủ SOA: Kiểm tra tồn kho và trừ kho từ Product Service)
+     * Hỗ trợ tạo đơn kèm danh sách mặt hàng (items array) hoặc 1 mặt hàng đơn lẻ
      *
      * @param Request $request
      * @return JsonResponse
@@ -89,79 +92,143 @@ class OrderController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $this->validate($request, [
-            'product_id' => 'required|integer|min:1',
-            'quantity' => 'required|integer|min:1',
-            'receiver_name' => 'nullable|string|max:255',
-            'receiver_phone' => 'nullable|string|max:50',
-            'shipping_address' => 'nullable|string',
-            'notes' => 'nullable|string',
-        ], [
-            'product_id.required' => 'Mã sản phẩm (product_id) là bắt buộc.',
-            'product_id.integer' => 'Mã sản phẩm phải là một số nguyên.',
-            'quantity.required' => 'Số lượng mua (quantity) là bắt buộc.',
-            'quantity.integer' => 'Số lượng mua phải là một số nguyên.',
-            'quantity.min' => 'Số lượng mua tối thiểu là 1.',
-        ]);
+        // 1. Kiểm tra cấu trúc payload
+        if ($request->has('items') && is_array($request->input('items'))) {
+            $this->validate($request, [
+                'customer_name' => 'nullable|string|max:255',
+                'customer_email' => 'nullable|email|max:255',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|integer|min:1',
+                'items.*.quantity' => 'required|integer|min:1',
+                'shipping_address' => 'nullable|string',
+                'notes' => 'nullable|string',
+            ], [
+                'items.required' => 'Danh sách mặt hàng (items) là bắt buộc.',
+                'items.min' => 'Đơn hàng phải có ít nhất 1 mặt hàng.',
+                'items.*.product_id.required' => 'Mã sản phẩm (product_id) là bắt buộc.',
+                'items.*.quantity.required' => 'Số lượng (quantity) là bắt buộc.',
+            ]);
 
-        $productId = (int) $request->input('product_id');
-        $quantity = (int) $request->input('quantity');
+            $rawItems = $request->input('items');
+        } else {
+            $this->validate($request, [
+                'product_id' => 'required|integer|min:1',
+                'quantity' => 'required|integer|min:1',
+                'customer_name' => 'nullable|string|max:255',
+                'customer_email' => 'nullable|email|max:255',
+                'shipping_address' => 'nullable|string',
+                'notes' => 'nullable|string',
+            ], [
+                'product_id.required' => 'Mã sản phẩm (product_id) là bắt buộc.',
+                'product_id.integer' => 'Mã sản phẩm phải là một số nguyên.',
+                'quantity.required' => 'Số lượng mua (quantity) là bắt buộc.',
+                'quantity.integer' => 'Số lượng mua phải là một số nguyên.',
+                'quantity.min' => 'Số lượng mua tối thiểu là 1.',
+            ]);
+
+            $rawItems = [
+                [
+                    'product_id' => (int) $request->input('product_id'),
+                    'quantity' => (int) $request->input('quantity'),
+                ]
+            ];
+        }
+
         $token = $request->bearerToken();
         $authUser = $request->attributes->get('auth_user') ?? [];
 
-        // 1. Giao tiếp liên dịch vụ SOA: Kiểm tra tồn kho tại Product Service (Port 8001)
-        $stockCheck = $this->productClient->checkStock($productId, $quantity, $token);
+        // 2. Giao tiếp liên dịch vụ SOA: Kiểm tra tồn kho cho tất cả sản phẩm
+        $verifiedItems = [];
+        foreach ($rawItems as $item) {
+            $pId = (int) $item['product_id'];
+            $qty = (int) $item['quantity'];
 
-        if (!$stockCheck['available']) {
-            $status = $stockCheck['status_code'] ?? 422;
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể tạo đơn hàng: ' . $stockCheck['message'],
-                'current_stock' => $stockCheck['current_stock'] ?? 0,
-                'requested_quantity' => $quantity,
-            ], $status);
+            $stockCheck = $this->productClient->checkStock($pId, $qty, $token);
+            if (!$stockCheck['available']) {
+                $status = $stockCheck['status_code'] ?? 422;
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể tạo đơn hàng: ' . $stockCheck['message'],
+                    'product_id' => $pId,
+                    'current_stock' => $stockCheck['current_stock'] ?? 0,
+                    'requested_quantity' => $qty,
+                ], $status);
+            }
+
+            $product = $stockCheck['product'];
+            $unitPrice = (float) $product['price'];
+            $totalPrice = $unitPrice * $qty;
+
+            $verifiedItems[] = [
+                'product_id' => $pId,
+                'product_name' => $product['name'],
+                'quantity' => $qty,
+                'unit_price' => $unitPrice,
+                'total_price' => $totalPrice,
+            ];
         }
 
-        $product = $stockCheck['product'];
-        $unitPrice = (float) $product['price'];
-        $totalPrice = $unitPrice * $quantity;
+        // 3. Trừ số lượng tồn kho qua Product Service
+        $decreasedItems = [];
+        foreach ($verifiedItems as $vItem) {
+            $decreaseRes = $this->productClient->decreaseStock($vItem['product_id'], $vItem['quantity'], $token);
+            if (!$decreaseRes['success']) {
+                // Hoàn tác kho cho các mặt hàng đã trừ trước đó nếu gặp lỗi
+                foreach ($decreasedItems as $dec) {
+                    $this->productClient->restoreStock($dec['product_id'], $dec['quantity'], $token);
+                }
 
-        // 2. Giao tiếp liên dịch vụ SOA: Trừ số lượng tồn kho tại Product Service
-        $decreaseRes = $this->productClient->decreaseStock($productId, $quantity, $token);
-        if (!$decreaseRes['success']) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lỗi đồng bộ kho với Product Service: ' . ($decreaseRes['error'] ?? 'Không thể trừ tồn kho.'),
-            ], 500);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lỗi đồng bộ kho với Product Service: ' . ($decreaseRes['error'] ?? 'Không thể trừ tồn kho.'),
+                ], 500);
+            }
+            $decreasedItems[] = $vItem;
         }
 
-        // 3. Lưu đơn hàng vào cơ sở dữ liệu riêng của Order Service
+        // 4. Lưu đơn hàng vào CSDL riêng của Order Service (theo chuẩn Phụ lục)
+        $customerName = $request->input('customer_name') 
+            ?? $request->input('receiver_name') 
+            ?? ($authUser['UserName'] ?? 'Nguyễn Văn Khách');
+        
+        $customerEmail = $request->input('customer_email') 
+            ?? ($authUser['Email'] ?? ($authUser['UserName'] ?? 'customer') . '@example.com');
+
+        $totalAmount = array_sum(array_column($verifiedItems, 'total_price'));
+
         $order = Order::create([
-            'user_id' => $authUser['IdUser'] ?? 1,
-            'user_name' => $authUser['UserName'] ?? 'student',
-            'product_id' => $productId,
-            'product_name' => $product['name'],
-            'quantity' => $quantity,
-            'unit_price' => $unitPrice,
-            'total_price' => $totalPrice,
+            'customer_name' => $customerName,
+            'customer_email' => $customerEmail,
+            'total_amount' => $totalAmount,
             'status' => 'pending',
-            'receiver_name' => $request->input('receiver_name', $authUser['UserName'] ?? 'Khách hàng'),
-            'receiver_phone' => $request->input('receiver_phone'),
+            'user_id' => $authUser['IdUser'] ?? 1,
             'shipping_address' => $request->input('shipping_address'),
             'notes' => $request->input('notes'),
         ]);
+
+        // 5. Lưu các chi tiết mặt hàng vào bảng order_items
+        foreach ($verifiedItems as $vItem) {
+            $order->items()->create([
+                'product_id' => $vItem['product_id'],
+                'product_name' => $vItem['product_name'],
+                'quantity' => $vItem['quantity'],
+                'unit_price' => $vItem['unit_price'],
+                'total_price' => $vItem['total_price'],
+            ]);
+        }
+
+        $order->load('items');
 
         return response()->json([
             'success' => true,
             'message' => 'Tạo đơn hàng mới thành công. Tồn kho sản phẩm đã được tự động cập nhật.',
             'data' => $order,
-            'remaining_stock' => $decreaseRes['remaining_stock'] ?? null,
         ], 201);
     }
 
     /**
      * PUT /orders/{id}
-     * Cập nhật thông tin / trạng thái đơn hàng
+     * Cập nhật trạng thái đơn hàng (pending, completed, cancelled)
      *
      * @param Request $request
      * @param int|string $id
@@ -170,7 +237,7 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        $order = Order::find($id);
+        $order = Order::with('items')->find($id);
 
         if (!$order) {
             return response()->json([
@@ -181,8 +248,8 @@ class OrderController extends Controller
 
         $this->validate($request, [
             'status' => 'sometimes|required|string|in:pending,confirmed,shipping,completed,cancelled',
-            'receiver_name' => 'nullable|string|max:255',
-            'receiver_phone' => 'nullable|string|max:50',
+            'customer_name' => 'nullable|string|max:255',
+            'customer_email' => 'nullable|email|max:255',
             'shipping_address' => 'nullable|string',
             'notes' => 'nullable|string',
         ], [
@@ -195,13 +262,15 @@ class OrderController extends Controller
 
         // Nghiệp vụ hoàn kho (SOA Compensation): Nếu hủy đơn hàng, tự động hoàn trả số lượng vào kho của Product Service
         if ($oldStatus !== 'cancelled' && $newStatus === 'cancelled') {
-            $this->productClient->restoreStock($order->product_id, $order->quantity, $token);
+            foreach ($order->items as $item) {
+                $this->productClient->restoreStock($item->product_id, $item->quantity, $token);
+            }
         }
 
         $order->update($request->only([
             'status',
-            'receiver_name',
-            'receiver_phone',
+            'customer_name',
+            'customer_email',
             'shipping_address',
             'notes',
         ]));
@@ -209,7 +278,7 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => "Cập nhật đơn hàng #{$id} thành công (Trạng thái: {$order->status}).",
-            'data' => $order->fresh(),
+            'data' => $order->fresh(['items']),
         ], 200);
     }
 
@@ -223,7 +292,7 @@ class OrderController extends Controller
      */
     public function destroy(Request $request, $id): JsonResponse
     {
-        $order = Order::find($id);
+        $order = Order::with('items')->find($id);
 
         if (!$order) {
             return response()->json([
@@ -236,10 +305,14 @@ class OrderController extends Controller
 
         // Nếu đơn hàng chưa hoàn tất hoặc chưa hủy, hoàn lại kho cho Product Service trước khi xóa
         if ($order->status !== 'cancelled' && $order->status !== 'completed') {
-            $this->productClient->restoreStock($order->product_id, $order->quantity, $token);
+            foreach ($order->items as $item) {
+                $this->productClient->restoreStock($item->product_id, $item->quantity, $token);
+            }
         }
 
         $deletedId = $order->id;
+        // Xóa chi tiết mặt hàng
+        $order->items()->delete();
         $order->delete();
 
         return response()->json([
